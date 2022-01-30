@@ -26,7 +26,7 @@ my_address = config[PRE]['my_address']
 discord_url = config[PRE]['discord_url']
 file_name = config[PRE]['file_name']
 
-rpc = nibiru_client.Client()
+rpc = nibiru_client.RPCClient()
 
 if os.path.exists(file_name):
     with open(file_name) as f:

@@ -67,7 +67,7 @@
   "gnetId": 11036,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1643348465326,
+  "iteration": 1643417333364,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -442,7 +442,8 @@
     },
     {
       "datasource": {
-        "uid": "$DS"
+        "type": "prometheus",
+        "uid": "${DS_COSMOS}"
       },
       "description": "",
       "fieldConfig": {
@@ -496,6 +497,10 @@
       "pluginVersion": "8.3.4",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_COSMOS}"
+          },
           "expr": "tendermint_consensus_total_txs{chain_id=\"$chain_id\", instance=\"$instance\"}",
           "format": "time_series",
           "interval": "30s",
@@ -548,10 +553,10 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
-        "orientation": "horizontal",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -563,28 +568,15 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_COSMOS}"
+            "uid": "$DS"
           },
-          "exemplar": true,
-          "expr": "tendermint_consensus_block_interval_seconds{chain_id=\"$chain_id\", instance=\"$instance\"}",
-          "format": "time_series",
-          "hide": true,
+          "exemplar": false,
+          "expr": "tendermint_consensus_block_interval_seconds_sum{chain_id=\"$chain_id\", instance=\"$instance\"}/tendermint_consensus_block_interval_seconds_count{chain_id=\"$chain_id\", instance=\"$instance\"}",
+          "hide": false,
           "interval": "30s",
           "intervalFactor": 1,
           "legendFormat": "",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$DS"
-          },
-          "exemplar": true,
-          "expr": "tendermint_consensus_block_interval_seconds_sum{chain_id=\"$chain_id\", instance=\"$instance\"}/tendermint_consensus_block_interval_seconds_count{chain_id=\"$chain_id\", instance=\"$instance\"}",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "B"
         }
       ],
       "timeFrom": "1h",
@@ -1573,7 +1565,7 @@
     "list": [
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "Cosmos",
           "value": "Cosmos"
         },
@@ -1644,7 +1636,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
@@ -1675,6 +1667,6 @@
   "timezone": "",
   "title": "Cosmos Dashboard",
   "uid": "UJyurCTWz",
-  "version": 12,
+  "version": 16,
   "weekStart": ""
 }
