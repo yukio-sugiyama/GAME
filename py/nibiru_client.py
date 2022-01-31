@@ -68,7 +68,8 @@ class RPCClient:
             raise HTTPGetException(res['error'])
         return res['result']
 
-#作成中
+# 作成中
+# https://v1.cosmos.network/rpc/v0.41.4
 class APIClient:
 
     def __del__(self):
