@@ -30,6 +30,6 @@ while true; do
 
     done
 
-    sleep 600
+    sleep $_SLEEP_TIME
 
 done
