@@ -162,6 +162,5 @@ try:
                 f.write(str(st_height))
 
 except Exception as e:
-    log.error(e)
+    log.error(f"Unexpected error:{e}")
     log.error(traceback.format_exc())
-    discord_Notify(discord_url, f"Error:Unexpected error [{args}]")
