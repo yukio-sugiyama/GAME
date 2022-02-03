@@ -100,6 +100,9 @@ try:
     log = log_set('nibiru', INFO, log_file)
     log.info(f"-- Start processing --")
 
+    count_day = 0
+    next_day = int(time.time() + ((60*60*24) - time.time() % (60*60*24)) + 1)
+
     while True:
         time.sleep(60)
         log.info(f"-- Start loop --")
@@ -139,8 +142,14 @@ try:
 
             log.info(f"check height:{chk_height} {'Signed' if sign_chk else 'Unsigned'}")
             if not sign_chk:
+                count_day += 1
                 discord_Notify(discord_url, f"`Unsigned height:{chk_height} date:{datetime.datetime.fromtimestamp(t).strftime('%Y/%m/%d %H:%M:%S')}`")
                 log.info(f"Unsigned height:{chk_height} date:{datetime.datetime.fromtimestamp(t).strftime('%Y/%m/%d %H:%M:%S')}")
+
+            if t >= next_day:
+                discord_Notify(discord_url, f"`Unsigned day summary:{count_day}`")
+                count_day = 0
+                next_day = int(time.time() + ((60*60*24) - time.time() % (60*60*24)) + 1)
 
             time.sleep(0.2)
 
