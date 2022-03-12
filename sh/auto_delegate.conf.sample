@@ -1,0 +1,25 @@
+#########
+# notice: please rename this file (auto_delegate.conf.sample -> auto_delegate.conf)
+#########
+
+_KEY=<your key>
+_ADDRESS=<your address>
+_VALIDATOR=<your validator address>
+_PASS=<wallet password>
+_NODE=http://localhost:26657
+_CHAIN=nibiru-3000
+_DENOM=ugame
+_FEE=20              #ugame
+_DELEGATE_RATE=100    #percent
+_MIN_BALANCE=1000000 #ugame
+
+#logging setting
+DEBUG=10
+INFO=20
+WARNING=30
+ERROR=40
+_LOG_LEVEL=${INFO}
+_LOG=auto_delegate.log
+
+#Record the timestamp, rewards, commission, fee
+_OUTPUT_FILE=reward_history.csv

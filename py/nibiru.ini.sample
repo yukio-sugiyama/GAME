@@ -1,3 +1,7 @@
+#########
+# notice: please rename this file (nibiru.ini.sample -> nibiru.ini)
+#########
+
 [nibiru-3000]
 log_file = unsigned_check.log
 

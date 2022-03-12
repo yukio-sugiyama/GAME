@@ -97,7 +97,7 @@ def date_to_jstdt(date):
 
 # Start processing
 try:
-    log = log_set('nibiru', INFO, log_file)
+    log = log_set(PRE, INFO, log_file)
     log.info(f"-- Start processing --")
 
     count_day = 0

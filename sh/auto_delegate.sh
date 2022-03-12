@@ -1,23 +1,7 @@
 #!/bin/bash
 
-_KEY=<your key>
-_ADDRESS=<your address>
-_VALIDATOR=<your validator address>
-_PASS=<wallet password>
-_NODE=http://localhost:26657
-_CHAIN=nibiru-3000
-_DENOM=ugame
-_FEE=10ugame
-_DELEGATE_RATE=50
-
-_LOG=auto_delegate.log
-
-DEBUG=10
-INFO=20
-WARNING=30
-ERROR=40
-_LOG_LEVEL=${INFO}
-
+# Read configuration file
+source auto_delegate.conf
 
 #####################
 # logging function
@@ -71,6 +55,9 @@ function wait_tx() {
 
 logging ${INFO} "--- process start!! ---"
 
+if [ ! -e ${_OUTPUT_FILE} ]; then
+    echo "timestamp, rewards, commission, fee" > ${_OUTPUT_FILE}
+fi
 
 # get balance
 AMOUNT=$(nibirud q bank balances ${_ADDRESS} --denom=${_DENOM} --node=${_NODE} --chain-id=${_CHIN} -o json | jq -r .amount)
@@ -84,12 +71,12 @@ logging ${INFO} "claim rewards & commission"
 HEIGHT=$(curl -s localhost:26657/status? | jq -r .result.sync_info.latest_block_height)
 
 # transaction execution
-RES=$(echo -e "${_PASS}\n" | nibirud tx distribution withdraw-rewards ${_VALIDATOR} --from=${_KEY} --fees=${_FEE} --gas=auto --commission --node=${_NODE} --chain-id=${_CHAIN} --timeout-height=$(($(curl -s ${_NODE}/status? | jq -r .result.sync_info.latest_block_height)+3)) -y -o json)
-logging ${DEBUG} "tx response: ${RES}"
+RES=$(echo -e "${_PASS}\n" | nibirud tx distribution withdraw-rewards ${_VALIDATOR} --from=${_KEY} --fees=${_FEE}${_DENOM} --gas=auto --gas-adjustment=1.15 --commission --node=${_NODE} --chain-id=${_CHAIN} --timeout-height=$(($(curl -s ${_NODE}/status? | jq -r .result.sync_info.latest_block_height)+10)) -y -o json)
+logging ${INFO} "tx response: ${RES}"
 
 # check return code
 CODE=$(echo ${RES} | jq -r .code)
-if [ ${CODE} -ne 0 ]; then
+if [ -z ${CODE} ] || [ ${CODE} -ne 0 ]; then
     logging $ERROR "rewards & commission claim error \n${RES}"
     exit 1
 fi
@@ -107,16 +94,20 @@ REC_REWARD=$(echo ${TX_DATA} | jq -r .logs[0].events[4].attributes[0].value | se
 REC_COMM=$(echo ${TX_DATA} | jq -r .logs[1].events[4].attributes[0].value | sed -e "s/${_DENOM}//g")
 PAY_FEE=$(echo ${TX_DATA} | jq -r .tx.auth_info.fee.amount[0].amount)
 
+# get balance
+AMOUNT=$(nibirud q bank balances ${_ADDRESS} --denom=${_DENOM} --node=${_NODE} --chain-id=${_CHIN} -o json | jq -r .amount)
+logging ${INFO} "now amount: ${AMOUNT}"
+
 DELEGATE_AMOUNT=$(( (REC_REWARD+REC_COMM) * ${_DELEGATE_RATE}/100 ))
+if [ $(( ${AMOUNT} - ${DELEGATE_AMOUNT} )) -le ${_MIN_BALANCE} ]; then
+    DELEGATE_AMOUNT=$(( ${AMOUNT} - ${_MIN_BALANCE} ))
+fi
 
 # Transaction data output
 logging ${INFO} "rewards: ${REC_REWARD}, commission: ${REC_COMM}, fee: ${PAY_FEE}"
 logging ${INFO} "delegate amount: ${DELEGATE_AMOUNT}"
 
-# get balance
-AMOUNT=$(nibirud q bank balances ${_ADDRESS} --denom=${_DENOM} --node=${_NODE} --chain-id=${_CHIN} -o json | jq -r .amount)
-logging ${INFO} "now amount: ${AMOUNT}"
-
+echo "${TIMESTAMP}, ${REC_REWARD}, ${REC_COMM}, ${PAY_FEE}" >> ${_OUTPUT_FILE}
 
 ### delegate proccess
 ##########################################
@@ -126,12 +117,12 @@ logging ${INFO} "delegate"
 HEIGHT=$(curl -s localhost:26657/status? | jq -r .result.sync_info.latest_block_height)
 
 # transaction execution
-RES=$(echo -e "${_PASS}\n" | nibirud tx staking delegate ${_VALIDATOR} ${DELEGATE_AMOUNT}${_DENOM} --from=${_KEY} --fees=${_FEE} --gas=auto --node=${_NODE} --chain-id=${_CHAIN} --timeout-height=$(($(curl -s ${_NODE}/status? | jq -r .result.sync_info.latest_block_height)+3)) -y -o json)
-logging ${DEBUG} "tx response: ${RES}"
+RES=$(echo -e "${_PASS}\n" | nibirud tx staking delegate ${_VALIDATOR} ${DELEGATE_AMOUNT}${_DENOM} --from=${_KEY} --fees=${_FEE}${_DENOM} --gas=auto --gas-adjustment=1.15 --node=${_NODE} --chain-id=${_CHAIN} --timeout-height=$(($(curl -s ${_NODE}/status? | jq -r .result.sync_info.latest_block_height)+10)) -y -o json)
+logging ${INFO} "tx response: ${RES}"
 
 # check return code
 CODE=$(echo ${RES} | jq -r .code)
-if [ ${CODE} -ne 0 ]; then
+if [ -z ${CODE} ] || [ ${CODE} -ne 0 ]; then
     logging ${ERROR} "delegate error \n${RES}"
     exit 1
 fi
@@ -155,3 +146,5 @@ logging ${INFO} "rewards: ${REC_REWARD}, commission: ${REC_COMM}, fee: ${PAY_FEE
 # get balance
 AMOUNT=$(nibirud q bank balances ${_ADDRESS} --denom=${_DENOM} --node=${_NODE} --chain-id=${_CHIN} -o json | jq -r .amount)
 logging ${INFO} "now amount: ${AMOUNT}"
+
+echo "${TIMESTAMP}, ${REC_REWARD}, ${REC_COMM}, ${PAY_FEE}" >> ${_OUTPUT_FILE}
