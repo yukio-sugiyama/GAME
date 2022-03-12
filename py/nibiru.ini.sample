@@ -10,4 +10,4 @@ my_address = <your address>
 # <curl -s localhost:26657/status | jq -r .result.validator_info.address>
 
 discord_url = <discord webhook>
-file_name = prv_height.txt
+record_file = prv_height.txt

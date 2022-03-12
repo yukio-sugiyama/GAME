@@ -24,12 +24,12 @@ config.read('nibiru.ini')
 log_file = config[PRE]['log_file']
 my_address = config[PRE]['my_address']
 discord_url = config[PRE]['discord_url']
-file_name = config[PRE]['file_name']
+record_file = config[PRE]['record_file']
 
 rpc = nibiru_client.RPCClient()
 
-if os.path.exists(file_name):
-    with open(file_name) as f:
+if os.path.exists(record_file):
+    with open(record_file) as f:
         st_height = int(f.read())
 else:
     st_height = 1
@@ -158,7 +158,7 @@ try:
 
         if chk_height > st_height:
             st_height = chk_height + 1
-            with open(file_name, mode='w') as f:
+            with open(record_file, mode='w') as f:
                 f.write(str(st_height))
 
 except Exception as e:
