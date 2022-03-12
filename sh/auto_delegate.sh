@@ -18,7 +18,7 @@ function logging() {
     esac
 
     if test ${LEVEL} -ge ${_LOG_LEVEL} ; then
-        echo -e $(date +%Y/%m/%d-%H:%M:%S) [${CLASS}] ${MESSAGE} >> ${_LOG}
+        echo -e $(date +%Y/%m/%d-%H:%M:%S) [${CLASS}] ${MESSAGE} 2>&1 | tee ${_LOG}
     fi
 }
 
@@ -98,7 +98,12 @@ PAY_FEE=$(echo ${TX_DATA} | jq -r .tx.auth_info.fee.amount[0].amount)
 AMOUNT=$(nibirud q bank balances ${_ADDRESS} --denom=${_DENOM} --node=${_NODE} --chain-id=${_CHIN} -o json | jq -r .amount)
 logging ${INFO} "now amount: ${AMOUNT}"
 
-DELEGATE_AMOUNT=$(( (REC_REWARD+REC_COMM) * ${_DELEGATE_RATE}/100 ))
+if [ $_AMOUNT_OR_REWARD  = "AMOUNT" ]; then
+    DELEGATE_AMOUNT=$(( ${AMOUNT} * ${_DELEGATE_RATE}/100 ))
+else
+    DELEGATE_AMOUNT=$(( (${REC_REWARD} + ${REC_COMM}) * ${_DELEGATE_RATE}/100 ))
+fi
+
 if [ $(( ${AMOUNT} - ${DELEGATE_AMOUNT} )) -le ${_MIN_BALANCE} ]; then
     DELEGATE_AMOUNT=$(( ${AMOUNT} - ${_MIN_BALANCE} ))
 fi

@@ -9,9 +9,10 @@ _PASS=<wallet password>
 _NODE=http://localhost:26657
 _CHAIN=nibiru-3000
 _DENOM=ugame
-_FEE=20              #ugame
-_DELEGATE_RATE=100    #percent
-_MIN_BALANCE=1000000 #ugame
+_FEE=500                  #ugame
+_DELEGATE_RATE=100        #percent
+_AMOUNT_OR_REWARD=AMOUNT  #Which asset to multiply the rate on
+_MIN_BALANCE=1000000      #ugame
 
 #logging setting
 DEBUG=10
