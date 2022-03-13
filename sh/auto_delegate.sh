@@ -18,7 +18,7 @@ function logging() {
     esac
 
     if test ${LEVEL} -ge ${_LOG_LEVEL} ; then
-        echo -e $(date +%Y/%m/%d-%H:%M:%S) [${CLASS}] ${MESSAGE} 2>&1 | tee ${_LOG}
+        echo -e $(date +%Y/%m/%d-%H:%M:%S) [${CLASS}] ${MESSAGE} 2>>&1 | tee ${_LOG}
     fi
 }
 
